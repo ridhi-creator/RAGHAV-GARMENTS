@@ -1,0 +1,6 @@
+{
+  "name": "Raghav Garments - Premium Men's Fashion",
+  "description": "Premium men's fashion e-commerce store offering luxury pajamas, trousers, jackets, and tracksuits with unmatched comfort and modern style.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
