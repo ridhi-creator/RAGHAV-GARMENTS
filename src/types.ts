@@ -98,7 +98,28 @@ export interface OrderDetails {
 }
 
 export type ActiveTab = 'all' | 'pajamas' | 'pants' | 'jackets' | 'tracksuits' | 'new-arrivals' | 'sale';
-export type PageView = 'shop' | 'about' | 'contact' | 'faq' | 'orders' | 'order-tracking' | 'admin-login' | 'admin-dashboard';
+export type PageView =
+  | 'shop'
+  | 'product'
+  | 'cart'
+  | 'wishlist'
+  | 'checkout'
+  | 'login'
+  | 'signup'
+  | 'wholesale'
+  | 'about'
+  | 'contact'
+  | 'faq'
+  | 'shipping-policy'
+  | 'returns-policy'
+  | 'size-guide'
+  | 'privacy-policy'
+  | 'terms'
+  | 'orders'
+  | 'order-tracking'
+  | 'admin-login'
+  | 'admin-dashboard'
+  | 'not-found';
 
 export interface AdminUser {
   name: string;

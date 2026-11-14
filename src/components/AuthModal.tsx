@@ -10,6 +10,7 @@ interface AuthModalProps {
   onLogout: () => void;
   onNavigateOrders?: () => void;
   onNavigateTracking?: () => void;
+  initialMode?: 'login' | 'signup';
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -19,11 +20,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onLogin,
   onLogout,
   onNavigateOrders,
-  onNavigateTracking
+  onNavigateTracking,
+  initialMode = 'login'
 }) => {
-  if (!isOpen) return null;
+  const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
 
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  React.useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode, isOpen]);
+
+  if (!isOpen) return null;
   const [formData, setFormData] = useState({
     name: 'Rahul Sharma',
     email: 'rahul.sharma@example.com',

@@ -1,4 +1,4 @@
-import { Product } from '../types';
+import type { Product } from '../types.ts';
 
 // ============================================================================
 // 22 ORIGINAL UPLOADED STORE PHOTOS (100% UNCHANGED COLOURS, DIRECT PATHS)
@@ -77,22 +77,22 @@ export const UPLOADED_TRACKSUIT_PHOTOS = {
 // ============================================================================
 
 // Pajamas ONLY
-const PAJAMAS_BLACK = '/src/assets/images/pajamas_cotton_black_1793695964673.jpg';
-const PAJAMAS_WHITE = '/src/assets/images/pajamas_white_cotton_1793697240501.jpg';
-const PAJAMAS_GREY = '/src/assets/images/pajamas_grey_loungewear_1793695985061.jpg';
-const PAJAMAS_LIFESTYLE = '/src/assets/images/category_mens_pajamas_1793694585873.jpg';
+const PAJAMAS_BLACK = '/assets/images/pajamas_cotton_black_1793695964673.jpg';
+const PAJAMAS_WHITE = '/assets/images/pajamas_white_cotton_1793697240501.jpg';
+const PAJAMAS_GREY = '/assets/images/pajamas_grey_loungewear_1793695985061.jpg';
+const PAJAMAS_LIFESTYLE = '/assets/images/category_mens_pajamas_1793694585873.jpg';
 
 // Jackets ONLY
-const JACKETS_BLACK_BOMBER = '/src/assets/images/jackets_black_bomber_1793695966059.jpg';
-const JACKETS_WHITE_BOMBER = '/src/assets/images/jackets_white_bomber_1793697273583.jpg';
-const JACKETS_GREY_BOMBER = '/src/assets/images/jackets_grey_bomber_1793697308773.jpg';
-const JACKETS_LIFESTYLE = '/src/assets/images/category_mens_jackets_1793694586560.jpg';
+const JACKETS_BLACK_BOMBER = '/assets/images/jackets_black_bomber_1793695966059.jpg';
+const JACKETS_WHITE_BOMBER = '/assets/images/jackets_white_bomber_1793697273583.jpg';
+const JACKETS_GREY_BOMBER = '/assets/images/jackets_grey_bomber_1793697308773.jpg';
+const JACKETS_LIFESTYLE = '/assets/images/category_mens_jackets_1793694586560.jpg';
 
 // Tracksuits ONLY
-const TRACKSUIT_BLACK_SET = '/src/assets/images/tracksuit_matching_set_1793695966365.jpg';
-const TRACKSUIT_WHITE_SET = '/src/assets/images/tracksuit_white_set_1793697344897.jpg';
-const TRACKSUIT_GREY_SET = '/src/assets/images/product_grey_variant_1793695351155.jpg';
-const TRACKSUIT_LIFESTYLE = '/src/assets/images/category_mens_tracksuits_1793694586466.jpg';
+const TRACKSUIT_BLACK_SET = '/assets/images/tracksuit_matching_set_1793695966365.jpg';
+const TRACKSUIT_WHITE_SET = '/assets/images/tracksuit_white_set_1793697344897.jpg';
+const TRACKSUIT_GREY_SET = '/assets/images/product_grey_variant_1793695351155.jpg';
+const TRACKSUIT_LIFESTYLE = '/assets/images/category_mens_tracksuits_1793694586466.jpg';
 
 export const MANDATORY_COLORS = [
   { name: 'Black', hex: '#111827' },

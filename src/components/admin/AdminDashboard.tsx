@@ -180,9 +180,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       description: 'Handcrafted luxury garment tailored with signature Raghav Garments precision.',
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       inStock: true,
-      blackImage: '/src/assets/images/pajamas_cotton_black_1793695964673.jpg',
-      whiteImage: '/src/assets/images/pajamas_white_cotton_1793697240501.jpg',
-      greyImage: '/src/assets/images/pajamas_grey_loungewear_1793695985061.jpg'
+      blackImage: '/assets/images/pajamas_cotton_black_1793695964673.jpg',
+      whiteImage: '/assets/images/pajamas_white_cotton_1793697240501.jpg',
+      greyImage: '/assets/images/pajamas_grey_loungewear_1793695985061.jpg'
     });
     setIsProductModalOpen(true);
   };
@@ -228,7 +228,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       sizes: productForm.sizes,
       inStock: productForm.inStock,
       images: [
-        productForm.blackImage || productForm.whiteImage || productForm.greyImage || '/src/assets/images/category_mens_pajamas_1793694585873.jpg'
+        productForm.blackImage || productForm.whiteImage || productForm.greyImage || '/assets/images/category_mens_pajamas_1793694585873.jpg'
       ],
       colorImages: {
         'Black': productForm.blackImage,

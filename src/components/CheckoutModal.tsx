@@ -453,25 +453,38 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
                   {/* Items mini list */}
                   <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
-                    {cart.map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-3 text-xs">
-                        <img
-                          src={item.product.colorImages?.[item.selectedColor] || item.product.images[0]}
-                          alt={`${item.product.name} in ${item.selectedColor}`}
-                          className="w-12 h-14 object-cover rounded-lg border border-slate-200 flex-shrink-0"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="flex-1">
-                          <p className="font-bold text-slate-900 line-clamp-1">{item.product.name}</p>
-                          <p className="text-[11px] text-slate-500">
-                            Size: {item.selectedSize} · <strong className="text-slate-700">Colour: {item.selectedColor}</strong> · Qty: {item.quantity}
-                          </p>
-                          <p className="font-extrabold text-[#080B12] tabular-nums mt-0.5">
-                            ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
-                          </p>
-                        </div>
+                    {cart.length === 0 ? (
+                      <div className="p-4 bg-white rounded-xl border border-dashed border-slate-300 text-center space-y-2">
+                        <p className="font-semibold text-slate-700">Your shopping bag is currently empty.</p>
+                        <button
+                          type="button"
+                          onClick={onClose}
+                          className="inline-flex items-center gap-1.5 text-[#1455D9] hover:underline font-bold"
+                        >
+                          <ArrowLeft className="w-3.5 h-3.5" /> Browse Products to Add Items
+                        </button>
                       </div>
-                    ))}
+                    ) : (
+                      cart.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-3 text-xs">
+                          <img
+                            src={item.product.colorImages?.[item.selectedColor] || item.product.images[0]}
+                            alt={`${item.product.name} in ${item.selectedColor}`}
+                            className="w-12 h-14 object-cover rounded-lg border border-slate-200 flex-shrink-0"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="flex-1">
+                            <p className="font-bold text-slate-900 line-clamp-1">{item.product.name}</p>
+                            <p className="text-[11px] text-slate-500">
+                              Size: {item.selectedSize} · <strong className="text-slate-700">Colour: {item.selectedColor}</strong> · Qty: {item.quantity}
+                            </p>
+                            <p className="font-extrabold text-[#080B12] tabular-nums mt-0.5">
+                              ₹{(item.product.price * item.quantity).toLocaleString('en-IN')}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
 
                   {/* Calculations */}

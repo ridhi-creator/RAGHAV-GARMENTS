@@ -14,7 +14,7 @@ export const Hero: React.FC<HeroProps> = ({ onShopNow, onExploreCollection, onOp
       {/* 1. Cinematic Fashion Background Image with Slow Zoom */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <img
-          src="/src/assets/images/hero_mens_fashion_lifestyle_1793694584426.jpg"
+          src="/assets/images/hero_mens_fashion_lifestyle_1793694584426.jpg"
           alt="Raghav Garments modern men's fashion lifestyle collection"
           className="w-full h-full object-cover object-top opacity-55 lg:opacity-70 transition-transform duration-1000 animate-hero-zoom will-change-transform"
           referrerPolicy="no-referrer"

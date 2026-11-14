@@ -8,6 +8,7 @@ interface ProductGridSectionProps {
   activeTab: ActiveTab;
   onSelectTab: (tab: ActiveTab) => void;
   onOpenDetails: (product: Product, preselectedColor?: string) => void;
+  onQuickView?: (product: Product, preselectedColor?: string) => void;
   onAddToCart: (product: Product, size: string, color: string) => void;
   wishlistIds: Set<string>;
   onToggleWishlist: (product: Product) => void;
@@ -20,6 +21,7 @@ export const ProductGridSection: React.FC<ProductGridSectionProps> = ({
   activeTab,
   onSelectTab,
   onOpenDetails,
+  onQuickView,
   onAddToCart,
   wishlistIds,
   onToggleWishlist
@@ -29,12 +31,14 @@ export const ProductGridSection: React.FC<ProductGridSectionProps> = ({
   const [selectedColorFilter, setSelectedColorFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('featured');
 
-  // Sync tab with collection filter if user clicked top nav
+  // Sync tab with collection filter and reset when switching back to a standard category
   React.useEffect(() => {
     if (activeTab === 'new-arrivals') {
       setCollectionFilter('new-arrivals');
     } else if (activeTab === 'sale') {
       setCollectionFilter('special-offers');
+    } else {
+      setCollectionFilter('all');
     }
   }, [activeTab]);
 
@@ -103,7 +107,7 @@ export const ProductGridSection: React.FC<ProductGridSectionProps> = ({
         {/* Section Top Heading */}
         <div className="text-center max-w-2xl mx-auto mb-10">
           <span className="text-xs font-bold uppercase tracking-widest text-[#1455D9]">
-            The Master Collection · All 22 Original Store Photographs
+            The Master Collection · {products.length} Original Store Styles
           </span>
           <h2 className="text-3xl sm:text-4xl font-black text-[#080B12] font-heading mt-1 tracking-tight">
             SIGNATURE APPAREL
@@ -138,6 +142,7 @@ export const ProductGridSection: React.FC<ProductGridSectionProps> = ({
                   onSelectTab('tracksuits');
                   setCollectionFilter('all');
                 } else {
+                  onSelectTab('all');
                   setCollectionFilter(tab.id as any);
                 }
               }}
@@ -289,6 +294,7 @@ export const ProductGridSection: React.FC<ProductGridSectionProps> = ({
                 product={product}
                 index={idx}
                 onOpenDetails={onOpenDetails}
+                onQuickView={onQuickView}
                 onAddToCart={onAddToCart}
                 isWishlisted={wishlistIds.has(product.id)}
                 onToggleWishlist={onToggleWishlist}

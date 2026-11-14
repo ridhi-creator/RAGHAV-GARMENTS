@@ -5,6 +5,7 @@ import { Product } from '../types';
 interface ProductCardProps {
   product: Product;
   onOpenDetails: (product: Product, preselectedColor?: string) => void;
+  onQuickView?: (product: Product, preselectedColor?: string) => void;
   onAddToCart: (product: Product, size: string, color: string) => void;
   isWishlisted: boolean;
   onToggleWishlist: (product: Product) => void;
@@ -14,6 +15,7 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onOpenDetails,
+  onQuickView,
   onAddToCart,
   isWishlisted,
   onToggleWishlist,
@@ -169,7 +171,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onOpenDetails(product, selectedColor);
+              if (onQuickView) {
+                onQuickView(product, selectedColor);
+              } else {
+                onOpenDetails(product, selectedColor);
+              }
             }}
             className="w-full bg-white/95 hover:bg-white text-slate-900 font-bold text-xs py-2 px-3 rounded-xl shadow-md flex items-center justify-center gap-1.5 backdrop-blur-xs transition-colors hover:text-[#1455D9]"
           >

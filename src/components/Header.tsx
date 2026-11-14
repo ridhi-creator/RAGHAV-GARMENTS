@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Heart, 
-  ShoppingBag, 
-  User, 
-  Menu, 
-  X, 
+import {
+  Search,
+  Heart,
+  ShoppingBag,
+  User,
+  Menu,
+  X,
   ChevronRight,
   ShieldCheck,
   Truck,
-  RotateCcw
+  RotateCcw,
+  Package,
+  Lock
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { ActiveTab, PageView } from '../types';
@@ -17,7 +19,9 @@ import { ActiveTab, PageView } from '../types';
 interface HeaderProps {
   activeTab: ActiveTab;
   onSelectTab: (tab: ActiveTab) => void;
+  onGoHome: () => void;
   currentPage: PageView;
+  isCatalogRoute?: boolean;
   onNavigatePage: (page: PageView) => void;
   cartCount: number;
   wishlistCount: number;
@@ -33,7 +37,9 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
   onSelectTab,
+  onGoHome,
   currentPage,
+  isCatalogRoute = false,
   onNavigatePage,
   cartCount,
   wishlistCount,
@@ -56,76 +62,103 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems: { label: string; tab: ActiveTab; highlight?: boolean }[] = [
-    { label: 'Home', tab: 'all' },
-    { label: 'Shop All', tab: 'all' },
-    { label: "Men's Pajamas", tab: 'pajamas' },
-    { label: 'Pants', tab: 'pants' },
-    { label: 'Jackets', tab: 'jackets' },
-    { label: 'Track Suits', tab: 'tracksuits' },
-    { label: 'New Arrivals', tab: 'new-arrivals' },
-    { label: 'Sale', tab: 'sale', highlight: true }
+  const navItems: { id: string; label: string; tab: ActiveTab; highlight?: boolean }[] = [
+    { id: 'home', label: 'Home', tab: 'all' },
+    { id: 'shop-all', label: 'Shop All', tab: 'all' },
+    { id: 'pajamas', label: "Men's Pajamas", tab: 'pajamas' },
+    { id: 'pants', label: 'Pants', tab: 'pants' },
+    { id: 'jackets', label: 'Jackets', tab: 'jackets' },
+    { id: 'tracksuits', label: 'Track Suits', tab: 'tracksuits' },
+    { id: 'new-arrivals', label: 'New Arrivals', tab: 'new-arrivals' },
+    { id: 'sale', label: 'Sale', tab: 'sale', highlight: true }
   ];
 
-  const handleTabClick = (tab: ActiveTab) => {
-    onNavigatePage('shop');
-    onSelectTab(tab);
+  const handleNavClick = (item: { id: string; tab: ActiveTab }) => {
+    if (item.id === 'home') {
+      onGoHome();
+    } else {
+      onSelectTab(item.tab);
+    }
+    setMobileMenuOpen(false);
+  };
+
+  const navigateAndClose = (page: PageView) => {
+    onNavigatePage(page);
     setMobileMenuOpen(false);
   };
 
   return (
-    <header className={`sticky top-0 z-40 bg-[#080B12] text-white transition-all duration-300 ${
-      isScrolled ? 'shadow-2xl shadow-black/80 border-b border-slate-800' : 'border-b border-slate-900'
-    }`}>
-      {/* 1. Top Announcement Bar */}
+    <header
+      className={`sticky top-0 z-40 bg-[#080B12] text-white transition-all duration-300 ${
+        isScrolled ? 'shadow-2xl shadow-black/80 border-b border-slate-800' : 'border-b border-slate-900'
+      }`}
+    >
+      {/* 1. Top Announcement & Quick Links Bar */}
       <div className="bg-black text-slate-300 py-2 px-4 text-xs font-medium border-b border-slate-900/80">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="hidden md:flex items-center gap-6 text-slate-300">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="hidden md:flex items-center gap-5 text-slate-300">
             <span className="flex items-center gap-1.5 transition-colors hover:text-white">
-              <Truck className="w-3.5 h-3.5 text-[#1455D9]" /> Free Shipping on Orders Above ₹999
+              <Truck className="w-3.5 h-3.5 text-[#1455D9]" /> Free Shipping ₹999+
             </span>
             <span className="flex items-center gap-1.5 transition-colors hover:text-white">
-              <RotateCcw className="w-3.5 h-3.5 text-[#1455D9]" /> Easy 7-Day Hassle-Free Returns
+              <RotateCcw className="w-3.5 h-3.5 text-[#1455D9]" /> 7-Day Returns
             </span>
           </div>
 
-          <div className="w-full md:w-auto text-center md:text-right flex items-center justify-center md:justify-end gap-2.5 text-white font-semibold">
+          <div className="w-full md:w-auto text-center md:text-right flex items-center justify-center md:justify-end gap-2 text-white font-semibold">
             <span className="bg-[#1455D9] text-white text-[10px] px-2 py-0.5 rounded uppercase font-bold tracking-wider inline-flex items-center gap-1">
               Festive Offer
             </span>
             <span className="text-xs">
-              Use Code <span className="text-yellow-400 font-extrabold underline decoration-yellow-400/50 underline-offset-2">RGARMENTS14</span> for Instant 10% OFF
+              Code <span className="text-yellow-400 font-extrabold underline decoration-yellow-400/50 underline-offset-2">RGARMENTS14</span> for 10% OFF
             </span>
           </div>
 
-          <div className="hidden lg:flex items-center gap-4 text-slate-400 text-[11px]">
-            <button 
-              onClick={() => onNavigatePage('order-tracking')} 
-              className="hover:text-white transition-colors flex items-center gap-1 font-semibold text-slate-200"
+          <div className="hidden lg:flex items-center gap-3 text-slate-400 text-[11px]">
+            <button
+              onClick={() => onNavigatePage('order-tracking')}
+              className={`hover:text-white transition-colors flex items-center gap-1 font-semibold cursor-pointer ${
+                currentPage === 'order-tracking' ? 'text-blue-400' : 'text-slate-200'
+              }`}
             >
               <Truck className="w-3.5 h-3.5 text-[#1455D9]" />
               <span>Track Order</span>
             </button>
             <span>·</span>
-            <button 
-              onClick={() => onNavigatePage('orders')} 
-              className="hover:text-white transition-colors"
+            <button
+              onClick={() => onNavigatePage('orders')}
+              className={`hover:text-white transition-colors cursor-pointer ${
+                currentPage === 'orders' ? 'text-white font-semibold' : ''
+              }`}
             >
               My Orders
             </button>
             <span>·</span>
-            <button 
-              onClick={() => onNavigatePage('faq')} 
-              className="hover:text-white transition-colors"
+            <button
+              onClick={() => onNavigatePage('about')}
+              className={`hover:text-white transition-colors cursor-pointer ${
+                currentPage === 'about' ? 'text-white font-semibold' : ''
+              }`}
             >
-              Need Help?
+              About Us
             </button>
             <span>·</span>
-            <button 
-              onClick={() => onNavigatePage('contact')} 
-              className="hover:text-white transition-colors"
+            <button
+              onClick={() => onNavigatePage('contact')}
+              className={`hover:text-white transition-colors cursor-pointer ${
+                currentPage === 'contact' ? 'text-white font-semibold' : ''
+              }`}
             >
-              Store Locator
+              Contact
+            </button>
+            <span>·</span>
+            <button
+              onClick={() => onNavigatePage('faq')}
+              className={`hover:text-white transition-colors cursor-pointer ${
+                currentPage === 'faq' ? 'text-white font-semibold' : ''
+              }`}
+            >
+              FAQ
             </button>
           </div>
         </div>
@@ -134,38 +167,41 @@ export const Header: React.FC<HeaderProps> = ({
       {/* 2. Premium Black Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 gap-4">
-          
           {/* Mobile Menu Button */}
           <div className="flex items-center lg:hidden">
             <button
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open navigation menu"
-              className="p-2 text-white hover:text-[#1455D9] rounded-lg focus:outline-none transition-colors"
+              className="p-2 text-white hover:text-[#1455D9] rounded-lg focus:outline-none transition-colors cursor-pointer"
             >
               <Menu className="w-6 h-6" />
             </button>
           </div>
 
-          {/* Official Uploaded Logo on the Left */}
+          {/* Official Brand Logo on the Left */}
           <button
-            onClick={() => {
-              onNavigatePage('shop');
-              onSelectTab('all');
-            }}
-            className="group flex items-center focus:outline-none py-1 transition-transform hover:scale-102"
+            onClick={onGoHome}
+            className="group flex items-center focus:outline-none py-1 transition-transform hover:scale-102 cursor-pointer"
             title="RAGHAV GARMENTS Home"
           >
             <BrandLogo size="md" />
           </button>
 
-          {/* Desktop Navigation Links with Royal-Blue Sliding Underline Hover Effects */}
+          {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-2 xl:gap-4">
             {navItems.map((item) => {
-              const isActive = currentPage === 'shop' && activeTab === item.tab;
+              const isActive =
+                currentPage === 'shop' &&
+                (item.id === 'home'
+                  ? activeTab === 'all' && !isCatalogRoute
+                  : item.id === 'shop-all'
+                  ? activeTab === 'all' && isCatalogRoute
+                  : activeTab === item.tab);
+
               return (
                 <button
-                  key={`${item.label}-${item.tab}`}
-                  onClick={() => handleTabClick(item.tab)}
+                  key={item.id}
+                  onClick={() => handleNavClick(item)}
                   className={`nav-link-anim relative px-2.5 py-1.5 text-sm font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer ${
                     isActive
                       ? 'text-[#1455D9] font-bold active'
@@ -185,23 +221,23 @@ export const Header: React.FC<HeaderProps> = ({
             })}
           </nav>
 
-          {/* Action Icons with Interactive Hover Pop */}
+          {/* Action Icons */}
           <div className="flex items-center gap-1.5 sm:gap-2.5">
-            {/* B2B Wholesale Action Button */}
-            {onOpenWholesale && (
-              <button
-                onClick={onOpenWholesale}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-300 hover:text-white bg-blue-950/60 hover:bg-[#1455D9] border border-blue-500/40 transition-all cursor-pointer"
-                title="Wholesale & Bulk Orders"
-              >
-                <span>B2B Wholesale</span>
-              </button>
-            )}
+            <button
+              onClick={onOpenWholesale ? onOpenWholesale : () => onNavigatePage('wholesale')}
+              className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                currentPage === 'wholesale'
+                  ? 'bg-[#1455D9] text-white border-[#1455D9]'
+                  : 'text-blue-300 hover:text-white bg-blue-950/60 hover:bg-[#1455D9] border-blue-500/40'
+              }`}
+              title="Wholesale & Bulk Orders"
+            >
+              <span>B2B Wholesale</span>
+            </button>
 
-            {/* Direct Track Order Button */}
             <button
               onClick={() => onNavigatePage('order-tracking')}
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 currentPage === 'order-tracking'
                   ? 'bg-[#1455D9] text-white shadow-md'
                   : 'text-slate-300 hover:text-white bg-slate-900/80 border border-slate-800 hover:border-slate-700'
@@ -212,24 +248,22 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Track</span>
             </button>
 
-            {/* Search Icon */}
             <button
               onClick={onOpenSearch}
               aria-label="Search products"
-              className="p-2 text-white hover:text-[#1455D9] hover:bg-white/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 relative"
+              className="p-2 text-white hover:text-[#1455D9] hover:bg-white/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 relative cursor-pointer"
               title="Search collection"
             >
               <Search className="w-5 h-5" />
             </button>
 
-            {/* Wishlist Icon */}
             <button
               onClick={onOpenWishlist}
               aria-label="View wishlist"
-              className="p-2 text-white hover:text-rose-400 hover:bg-white/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 relative"
+              className="p-2 text-white hover:text-rose-400 hover:bg-white/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 relative cursor-pointer"
               title="Wishlist"
             >
-              <Heart className="w-5 h-5" />
+              <Heart className={`w-5 h-5 ${currentPage === 'wishlist' ? 'text-rose-400 fill-current' : ''}`} />
               {wishlistCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-heart-pop">
                   {wishlistCount}
@@ -237,11 +271,10 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* Account Icon */}
             <button
               onClick={onOpenAuth}
               aria-label="Customer account"
-              className="p-2 text-white hover:text-[#1455D9] hover:bg-white/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 relative"
+              className="p-2 text-white hover:text-[#1455D9] hover:bg-white/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 relative cursor-pointer"
               title={currentUser ? `Logged in as ${currentUser.name}` : 'Login / Register'}
             >
               <User className="w-5 h-5" />
@@ -250,11 +283,10 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* Shopping Bag Icon with Live Badge & Bounce Effect */}
             <button
               onClick={onOpenCart}
               aria-label="Shopping bag"
-              className={`flex items-center gap-2 bg-[#1455D9] hover:bg-[#0F42A8] text-white px-3.5 py-2.5 rounded-xl font-semibold shadow-lg shadow-blue-900/40 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
+              className={`flex items-center gap-2 bg-[#1455D9] hover:bg-[#0F42A8] text-white px-3.5 py-2.5 rounded-xl font-semibold shadow-lg shadow-blue-900/40 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer ${
                 cartBounce ? 'animate-cart-bounce ring-4 ring-blue-400/80' : ''
               }`}
             >
@@ -265,14 +297,13 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </button>
           </div>
-
         </div>
       </div>
 
-      {/* Mobile Drawer Navigation (Black / Dark Theme) */}
+      {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div 
+          <div
             className="fixed inset-0 bg-black/80 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
@@ -282,7 +313,7 @@ export const Header: React.FC<HeaderProps> = ({
               <BrandLogo size="sm" />
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 text-slate-400 hover:text-white rounded-lg"
+                className="p-2 text-slate-400 hover:text-white rounded-lg cursor-pointer"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -292,56 +323,127 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 py-2">
                 Shopping Categories
               </div>
-              {navItems.map((item) => (
-                <button
-                  key={`mobile-${item.label}`}
-                  onClick={() => handleTabClick(item.tab)}
-                  className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold transition-colors ${
-                    activeTab === item.tab
-                      ? 'bg-blue-600/20 text-[#1455D9] font-bold border border-blue-500/30'
-                      : 'text-slate-200 hover:bg-white/5 hover:text-[#1455D9]'
-                  }`}
-                >
-                  <span>{item.label}</span>
-                  <ChevronRight className="w-4 h-4 text-slate-500" />
-                </button>
-              ))}
+              {navItems.map((item) => {
+                const isActive =
+                  currentPage === 'shop' &&
+                  (item.id === 'home'
+                    ? activeTab === 'all' && !isCatalogRoute
+                    : item.id === 'shop-all'
+                    ? activeTab === 'all' && isCatalogRoute
+                    : activeTab === item.tab);
+                return (
+                  <button
+                    key={`mobile-${item.id}`}
+                    onClick={() => handleNavClick(item)}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-blue-600/20 text-[#1455D9] font-bold border border-blue-500/30'
+                        : 'text-slate-200 hover:bg-white/5 hover:text-[#1455D9]'
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    <ChevronRight className="w-4 h-4 text-slate-500" />
+                  </button>
+                );
+              })}
 
-              <div className="pt-4 border-t border-slate-800 my-2">
+              <div className="pt-3 border-t border-slate-800 my-2">
                 <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 py-2">
-                  Company & Support
+                  Orders, Account &amp; B2B
                 </div>
                 <button
-                  onClick={() => {
-                    onNavigatePage('about');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg"
+                  onClick={() => navigateAndClose('cart')}
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  <span>Shopping Cart ({cartCount})</span>
+                  <ShoppingBag className="w-4 h-4 text-[#1455D9]" />
+                </button>
+                <button
+                  onClick={() => navigateAndClose('wishlist')}
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  <span>Wishlist ({wishlistCount})</span>
+                  <Heart className="w-4 h-4 text-rose-400" />
+                </button>
+                <button
+                  onClick={() => navigateAndClose('orders')}
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  <span>My Orders</span>
+                  <Package className="w-4 h-4 text-[#1455D9]" />
+                </button>
+                <button
+                  onClick={() => navigateAndClose('order-tracking')}
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  <span>Track Order</span>
+                  <Truck className="w-4 h-4 text-[#1455D9]" />
+                </button>
+                <button
+                  onClick={() => navigateAndClose('login')}
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  <span>{currentUser ? `Account (${currentUser.name})` : 'Login / Sign Up'}</span>
+                  <User className="w-4 h-4 text-[#1455D9]" />
+                </button>
+                <button
+                  onClick={() => navigateAndClose('wholesale')}
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-blue-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  <span>B2B Wholesale Portal</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800 my-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 py-2">
+                  Company &amp; Policies
+                </div>
+                <button
+                  onClick={() => navigateAndClose('about')}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
                 >
                   About Raghav Garments
                 </button>
                 <button
-                  onClick={() => {
-                    onNavigatePage('faq');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg"
+                  onClick={() => navigateAndClose('size-guide')}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  Size Chart &amp; Fitting
+                </button>
+                <button
+                  onClick={() => navigateAndClose('shipping-policy')}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  Shipping &amp; Delivery Policy
+                </button>
+                <button
+                  onClick={() => navigateAndClose('returns-policy')}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  Easy 7-Day Returns
+                </button>
+                <button
+                  onClick={() => navigateAndClose('faq')}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
                 >
                   Frequently Asked Questions
                 </button>
                 <button
-                  onClick={() => {
-                    onNavigatePage('contact');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg"
+                  onClick={() => navigateAndClose('contact')}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
                 >
-                  Store & Contact Info
+                  Contact Us
+                </button>
+                <button
+                  onClick={() => navigateAndClose('admin-login')}
+                  className="w-full flex items-center gap-2 text-left px-3 py-2 text-sm font-semibold text-[#1455D9] hover:text-blue-400 hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  <Lock className="w-3.5 h-3.5" /> Admin Login
                 </button>
               </div>
             </div>
 
-            {/* Mobile Footer */}
             <div className="p-4 border-t border-slate-800 bg-black/60 space-y-2 text-xs text-slate-400">
               <div className="flex items-center gap-2 text-white font-semibold">
                 <ShieldCheck className="w-4 h-4 text-[#1455D9]" /> 100% Genuine Quality Guaranteed

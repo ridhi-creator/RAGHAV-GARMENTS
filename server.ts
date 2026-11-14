@@ -1,5 +1,4 @@
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
@@ -11,6 +10,7 @@ import {
   updateSupabaseKey,
   SUPABASE_ORDERS_TABLE_SQL
 } from './src/supabase.ts';
+import { PRODUCTS } from './src/data/products.ts';
 
 const app = express();
 // STRICT CONSTRAINT: Dev server must run on port 3000. Do not use process.env.PORT (Cloud Run sets 8080).
@@ -145,7 +145,7 @@ let categories = [
     key: 'jackets',
     title: "Men's Jackets & Bombers",
     subtitle: 'Weather-resistant lightweight bomber jackets & insulated zip-ups.',
-    image: '/src/assets/images/jackets_black_bomber_1793695966059.jpg',
+    image: '/assets/images/jackets_black_bomber_1793695966059.jpg',
     itemCount: 4,
     isActive: true
   },
@@ -154,7 +154,7 @@ let categories = [
     key: 'tracksuits',
     title: "Men's Track Suits & Athleisure",
     subtitle: 'Coordinated aerodynamic zip-track jackets with tapered track pants.',
-    image: '/public/tracksuits/WhatsApp%20Image%202026-11-06%20at%204.32.30%20PM.jpeg',
+    image: '/tracksuits/WhatsApp%20Image%202026-11-06%20at%204.32.30%20PM.jpeg',
     itemCount: 11,
     isActive: true
   }
@@ -578,24 +578,78 @@ let orders: any[] = [
   }
 ];
 
-let products: any[] = [];
+let products: any[] = JSON.parse(JSON.stringify(PRODUCTS));
 
 async function initializeProducts() {
-  try {
-    const productsModule = await import('./src/data/products.js').catch(async () => {
-      return await import('./src/data/products.ts');
-    });
-    if (productsModule && productsModule.PRODUCTS) {
-      products = JSON.parse(JSON.stringify(productsModule.PRODUCTS));
-    }
-  } catch (err) {
-    console.warn('Could not load products via dynamic import, using fallback seed:', err);
+  if (products.length === 0) {
+    products = JSON.parse(JSON.stringify(PRODUCTS));
   }
 }
 
 // ============================================================================
-// OWNER AUTHORIZATION MIDDLEWARE
+// OWNER AUTHORIZATION MIDDLEWARE (Supports both stateful map & stateless HMAC for Vercel)
 // ============================================================================
+
+const revokedTokens = new Set<string>();
+
+function getTokenSigningSecret(): string {
+  return process.env.ADMIN_SESSION_SECRET || crypto.createHash('sha256').update(`${ownerPasswordHash}:raghav-garments-owner-key`).digest('hex');
+}
+
+function issueSignedOwnerToken(user: OwnerUser, ttlMs: number = 24 * 60 * 60 * 1000): { token: string; expiresAt: number } {
+  const expiresAt = Date.now() + ttlMs;
+  const payload = Buffer.from(JSON.stringify({ user, expiresAt }), 'utf8').toString('base64url');
+  const sig = crypto.createHmac('sha256', getTokenSigningSecret()).update(payload).digest('base64url');
+  const token = `${payload}.${sig}`;
+
+  activeSessions.set(token, {
+    token,
+    createdAt: Date.now(),
+    expiresAt,
+    user
+  });
+
+  return { token, expiresAt };
+}
+
+function verifyOwnerToken(token: string): { valid: boolean; expired?: boolean; user?: OwnerUser } {
+  if (!token || revokedTokens.has(token)) {
+    return { valid: false };
+  }
+
+  const memSession = activeSessions.get(token);
+  if (memSession) {
+    if (Date.now() > memSession.expiresAt) {
+      activeSessions.delete(token);
+      return { valid: false, expired: true };
+    }
+    return { valid: true, user: memSession.user };
+  }
+
+  const parts = token.split('.');
+  if (parts.length !== 2) {
+    return { valid: false };
+  }
+
+  const [payload, sig] = parts;
+  const expectedSig = crypto.createHmac('sha256', getTokenSigningSecret()).update(payload).digest('base64url');
+  if (sig.length !== expectedSig.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+    return { valid: false };
+  }
+
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    if (!parsed?.user?.email || typeof parsed.expiresAt !== 'number') {
+      return { valid: false };
+    }
+    if (Date.now() > parsed.expiresAt) {
+      return { valid: false, expired: true };
+    }
+    return { valid: true, user: parsed.user as OwnerUser };
+  } catch {
+    return { valid: false };
+  }
+}
 
 function requireOwnerAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
   const authHeader = req.headers.authorization;
@@ -607,28 +661,22 @@ function requireOwnerAuth(req: express.Request, res: express.Response, next: exp
   }
 
   const token = authHeader.substring(7);
-  const session = activeSessions.get(token);
+  const verified = verifyOwnerToken(token);
 
-  if (!session) {
+  if (!verified.valid || !verified.user) {
     return res.status(401).json({
-      code: 'INVALID_SESSION',
-      error: 'Unauthorized: Invalid or expired owner session'
-    });
-  }
-
-  if (Date.now() > session.expiresAt) {
-    activeSessions.delete(token);
-    return res.status(401).json({
-      code: 'SESSION_EXPIRED',
-      error: 'Unauthorized: Owner session has expired, please authenticate again'
+      code: verified.expired ? 'SESSION_EXPIRED' : 'INVALID_SESSION',
+      error: verified.expired
+        ? 'Unauthorized: Owner session has expired, please authenticate again'
+        : 'Unauthorized: Invalid or expired owner session'
     });
   }
 
   // STRICT DOUBLE-CHECK: User email MUST exactly match the authorized owner email
-  if (session.user.email.toLowerCase() !== AUTHORIZED_OWNER_EMAIL.toLowerCase()) {
+  if (verified.user.email.toLowerCase() !== AUTHORIZED_OWNER_EMAIL.toLowerCase()) {
     activeSessions.delete(token);
     recordAuditLog(
-      session.user.email,
+      verified.user.email,
       'TOKEN_HIJACK_ATTEMPT',
       'BLOCKED',
       req,
@@ -640,7 +688,7 @@ function requireOwnerAuth(req: express.Request, res: express.Response, next: exp
     });
   }
 
-  (req as any).ownerUser = session.user;
+  (req as any).ownerUser = verified.user;
   next();
 }
 
@@ -673,8 +721,7 @@ app.post('/api/admin/google-auth', (req, res) => {
     });
   }
 
-  // Issue secure 24-hr session token for the owner
-  const token = crypto.randomBytes(32).toString('hex');
+  // Issue secure 24-hr signed session token for the owner
   const user: OwnerUser = {
     name: name || 'Ridhi Taneja',
     email: AUTHORIZED_OWNER_EMAIL,
@@ -683,12 +730,7 @@ app.post('/api/admin/google-auth', (req, res) => {
     lastLogin: new Date().toISOString()
   };
 
-  activeSessions.set(token, {
-    token,
-    createdAt: Date.now(),
-    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
-    user
-  });
+  const { token } = issueSignedOwnerToken(user);
 
   recordAuditLog(
     AUTHORIZED_OWNER_EMAIL,
@@ -746,8 +788,7 @@ app.post('/api/admin/login', (req, res) => {
     });
   }
 
-  // Issue secure session token
-  const token = crypto.randomBytes(32).toString('hex');
+  // Issue secure signed session token
   const user: OwnerUser = {
     name: 'Ridhi Taneja',
     email: AUTHORIZED_OWNER_EMAIL,
@@ -756,12 +797,7 @@ app.post('/api/admin/login', (req, res) => {
     lastLogin: new Date().toISOString()
   };
 
-  activeSessions.set(token, {
-    token,
-    createdAt: Date.now(),
-    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
-    user
-  });
+  const { token } = issueSignedOwnerToken(user);
 
   recordAuditLog(
     AUTHORIZED_OWNER_EMAIL,
@@ -786,17 +822,17 @@ app.get('/api/admin/verify', (req, res) => {
   }
 
   const token = authHeader.substring(7);
-  const session = activeSessions.get(token);
+  const verified = verifyOwnerToken(token);
 
-  if (!session || Date.now() > session.expiresAt) {
+  if (!verified.valid || !verified.user) {
     return res.status(401).json({ valid: false });
   }
 
-  if (session.user.email.toLowerCase() !== AUTHORIZED_OWNER_EMAIL.toLowerCase()) {
+  if (verified.user.email.toLowerCase() !== AUTHORIZED_OWNER_EMAIL.toLowerCase()) {
     return res.status(403).json({ valid: false, code: 'ACCESS_DENIED' });
   }
 
-  return res.json({ valid: true, user: session.user });
+  return res.json({ valid: true, user: verified.user });
 });
 
 // 4. Secure Logout
@@ -804,6 +840,7 @@ app.post('/api/admin/logout', (req, res) => {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
+    revokedTokens.add(token);
     const session = activeSessions.get(token);
     if (session) {
       recordAuditLog(session.user.email, 'OWNER_LOGOUT', 'SUCCESS', req, 'Owner terminated session');
@@ -953,7 +990,7 @@ app.post('/api/products', requireOwnerAuth, (req, res) => {
       { name: 'Grey', hex: '#6B7280' }
     ],
     colorImages: item.colorImages || {},
-    images: item.images || [item.image || '/src/assets/images/category_mens_pajamas_1793694585873.jpg'],
+    images: item.images || [item.image || '/assets/images/category_mens_pajamas_1793694585873.jpg'],
     badge: item.badge || 'New Arrival',
     description: item.description || '',
     features: item.features || ['Premium fabric', 'Precision fit', 'Durable stitch'],
@@ -1021,7 +1058,7 @@ app.post('/api/categories', requireOwnerAuth, (req, res) => {
     key,
     title,
     subtitle: subtitle || '',
-    image: image || '/src/assets/images/category_mens_pajamas_1793694585873.jpg',
+    image: image || '/assets/images/category_mens_pajamas_1793694585873.jpg',
     itemCount: 0,
     isActive: true
   };
@@ -1640,6 +1677,10 @@ app.get('/api/wholesale-inquiries', requireOwnerAuth, (_req, res) => {
   res.json(wholesaleInquiries);
 });
 
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', port: PORT });
+});
+
 // ============================================================================
 // DEV SERVER / STATIC SERVING (STRICTLY ON PORT 3000)
 // ============================================================================
@@ -1647,12 +1688,35 @@ app.get('/api/wholesale-inquiries', requireOwnerAuth, (_req, res) => {
 async function startServer() {
   await initializeProducts();
 
-  if (!isProduction) {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
+  if (!isProduction && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import('vite');
+    const viteState: { middlewares: express.RequestHandler | null } = { middlewares: null };
+    const viteReadyPromise = createViteServer({
+      server: {
+        middlewareMode: true,
+        hmr: false,
+        watch: null
+      },
       appType: 'spa'
+    })
+      .then((vite) => {
+        viteState.middlewares = vite.middlewares;
+        return vite;
+      })
+      .catch((err) => {
+        console.error('Vite middleware initialization error:', err);
+        return null;
+      });
+
+    app.use(async (req, res, next) => {
+      if (!viteState.middlewares) {
+        await viteReadyPromise;
+      }
+      if (viteState.middlewares) {
+        return viteState.middlewares(req, res, next);
+      }
+      next();
     });
-    app.use(vite.middlewares);
   } else {
     const distPath = path.resolve(process.cwd(), 'dist');
     if (fs.existsSync(distPath)) {
@@ -1669,6 +1733,10 @@ async function startServer() {
   });
 }
 
-startServer().catch((err) => {
-  console.error('Failed to start server:', err);
-});
+if (!process.env.VERCEL) {
+  startServer().catch((err) => {
+    console.error('Failed to start server:', err);
+  });
+}
+
+export default app;
