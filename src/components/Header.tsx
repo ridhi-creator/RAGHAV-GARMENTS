@@ -160,6 +160,15 @@ export const Header: React.FC<HeaderProps> = ({
             >
               FAQ
             </button>
+            <span>·</span>
+            <button
+              onClick={() => onNavigatePage('feedback')}
+              className={`hover:text-white transition-colors cursor-pointer ${
+                currentPage === 'feedback' ? 'text-white font-semibold' : ''
+              }`}
+            >
+              Feedback
+            </button>
           </div>
         </div>
       </div>
@@ -428,6 +437,12 @@ export const Header: React.FC<HeaderProps> = ({
                   className="w-full text-left px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
                 >
                   Frequently Asked Questions
+                </button>
+                <button
+                  onClick={() => navigateAndClose('feedback')}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg cursor-pointer"
+                >
+                  Customer Feedback &amp; Reviews
                 </button>
                 <button
                   onClick={() => navigateAndClose('contact')}

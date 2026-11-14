@@ -20,19 +20,22 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { PageView, ActiveTab } from '../types';
+import { FaqAndFeedbackSection } from './FaqAndFeedbackSection';
 
 interface StaticPagesProps {
   page: PageView;
   onBackToShop: () => void;
   onNavigatePage?: (page: PageView) => void;
   onBrowseCategory?: (tab: ActiveTab) => void;
+  showToast?: (msg: string) => void;
 }
 
 export const StaticPages: React.FC<StaticPagesProps> = ({
   page,
   onBackToShop,
   onNavigatePage,
-  onBrowseCategory
+  onBrowseCategory,
+  showToast
 }) => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [contactSubmitted, setContactSubmitted] = useState(false);
@@ -79,6 +82,7 @@ export const StaticPages: React.FC<StaticPagesProps> = ({
     about: 'About Us',
     contact: 'Contact Us',
     faq: 'Frequently Asked Questions',
+    feedback: 'Customer Feedback & Reviews',
     'shipping-policy': 'Shipping & Delivery Policy',
     'returns-policy': 'Returns & Exchange Policy',
     'size-guide': 'Size Chart & Fitting Guide',
@@ -382,6 +386,25 @@ export const StaticPages: React.FC<StaticPagesProps> = ({
                 </button>
               </div>
             )}
+
+            <div className="-mx-4 sm:-mx-6 lg:-mx-8 pt-4">
+              <FaqAndFeedbackSection
+                mode="feedback"
+                onNavigatePage={onNavigatePage}
+                showToast={showToast}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* --- 3B. CUSTOMER FEEDBACK PAGE --- */}
+        {page === 'feedback' && (
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <FaqAndFeedbackSection
+              mode="both"
+              onNavigatePage={onNavigatePage}
+              showToast={showToast}
+            />
           </div>
         )}
 

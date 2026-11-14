@@ -17,6 +17,7 @@ import { SearchModal } from './components/SearchModal';
 import { AuthModal } from './components/AuthModal';
 import { WholesaleModal } from './components/WholesaleModal';
 import { StaticPages } from './components/StaticPages';
+import { FaqAndFeedbackSection } from './components/FaqAndFeedbackSection';
 import { Footer } from './components/Footer';
 import { LogoIntro } from './components/LogoIntro';
 import { AdminLogin } from './components/admin/AdminLogin';
@@ -118,6 +119,9 @@ function parseRoute(pathname: string): ParsedRoute {
   if (normalized === '/faq' || normalized === '/help') {
     return { page: 'faq', tab: 'all' };
   }
+  if (normalized === '/feedback' || normalized === '/customer-feedback' || normalized === '/reviews') {
+    return { page: 'feedback', tab: 'all' };
+  }
   if (normalized === '/shipping-policy' || normalized === '/shipping') {
     return { page: 'shipping-policy', tab: 'all' };
   }
@@ -186,6 +190,8 @@ function getPagePath(page: PageView, tab: ActiveTab = 'all', productId?: string)
       return '/contact';
     case 'faq':
       return '/faq';
+    case 'feedback':
+      return '/feedback';
     case 'shipping-policy':
       return '/shipping-policy';
     case 'returns-policy':
@@ -425,6 +431,8 @@ export default function App() {
       document.title = 'Contact Us | RAGHAV GARMENTS';
     } else if (currentPage === 'faq') {
       document.title = 'FAQ | RAGHAV GARMENTS';
+    } else if (currentPage === 'feedback') {
+      document.title = 'Customer Feedback & Reviews | RAGHAV GARMENTS';
     } else if (currentPage === 'shipping-policy') {
       document.title = 'Shipping Policy | RAGHAV GARMENTS';
     } else if (currentPage === 'returns-policy') {
@@ -868,6 +876,12 @@ export default function App() {
                 </div>
               </div>
             </div>
+
+            <FaqAndFeedbackSection
+              mode="both"
+              onNavigatePage={(page) => navigateToPage(page)}
+              showToast={showToast}
+            />
           </>
         ) : currentPage === 'product' ? (
           <ProductDetailsPage
@@ -959,6 +973,7 @@ export default function App() {
             onBackToShop={handleGoHome}
             onNavigatePage={(page) => navigateToPage(page)}
             onBrowseCategory={(tab) => scrollToCatalog(tab)}
+            showToast={showToast}
           />
         )}
       </main>

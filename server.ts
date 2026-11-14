@@ -1677,6 +1677,67 @@ app.get('/api/wholesale-inquiries', requireOwnerAuth, (_req, res) => {
   res.json(wholesaleInquiries);
 });
 
+// Customer Feedback & Reviews
+let customerFeedbackList: any[] = [
+  {
+    id: 'fb-01',
+    name: 'Rajesh Sharma',
+    city: 'New Delhi',
+    category: "Men's Pants",
+    rating: 5,
+    comment: 'Superb stretch and stitching quality. Fits true to size even after several washes.',
+    createdAt: '02 Nov 2026',
+    verified: true
+  },
+  {
+    id: 'fb-02',
+    name: 'Vikram Malhotra',
+    city: 'Mumbai',
+    category: "Men's Track Suits",
+    rating: 5,
+    comment: 'Ordered both retail and 15 pieces for our menswear counter. Exact colour match as shown in photos.',
+    createdAt: '05 Nov 2026',
+    verified: true
+  },
+  {
+    id: 'fb-03',
+    name: 'Aman Verma',
+    city: 'Kaithal, Haryana',
+    category: "Men's Pajamas",
+    rating: 5,
+    comment: 'Soft combed cotton pajamas with comfortable elastic waistband. Fast delivery and helpful support.',
+    createdAt: '09 Nov 2026',
+    verified: true
+  }
+];
+
+app.get('/api/feedback', (_req, res) => {
+  res.json(customerFeedbackList);
+});
+
+app.post('/api/feedback', (req, res) => {
+  const { name, city, category, rating, comment } = req.body || {};
+  if (!name || !String(name).trim() || !comment || !String(comment).trim()) {
+    return res.status(400).json({ error: 'Name and feedback message are required.' });
+  }
+  const numericRating = Math.min(5, Math.max(1, Number(rating) || 5));
+  const entry = {
+    id: `fb-${Date.now()}`,
+    name: String(name).trim(),
+    city: city ? String(city).trim() : 'India',
+    category: category ? String(category).trim() : 'Overall Store Experience',
+    rating: numericRating,
+    comment: String(comment).trim(),
+    createdAt: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+    verified: true
+  };
+  customerFeedbackList.unshift(entry);
+  if (customerFeedbackList.length > 50) {
+    customerFeedbackList.pop();
+  }
+  return res.status(201).json({ success: true, feedback: entry });
+});
+
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', port: PORT });
 });

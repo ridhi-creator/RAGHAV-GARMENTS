@@ -110,6 +110,7 @@ export type PageView =
   | 'about'
   | 'contact'
   | 'faq'
+  | 'feedback'
   | 'shipping-policy'
   | 'returns-policy'
   | 'size-guide'
@@ -120,6 +121,17 @@ export type PageView =
   | 'admin-login'
   | 'admin-dashboard'
   | 'not-found';
+
+export interface CustomerFeedback {
+  id: string;
+  name: string;
+  city?: string;
+  category: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  verified?: boolean;
+}
 
 export interface AdminUser {
   name: string;

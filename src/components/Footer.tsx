@@ -264,6 +264,11 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onNavigatePage
                 </button>
               </li>
               <li>
+                <button onClick={() => onNavigatePage('feedback')} className="hover:text-white transition-colors cursor-pointer">
+                  Customer Feedback
+                </button>
+              </li>
+              <li>
                 <button onClick={() => onNavigatePage('shipping-policy')} className="hover:text-white transition-colors cursor-pointer">
                   Shipping &amp; Delivery
                 </button>
