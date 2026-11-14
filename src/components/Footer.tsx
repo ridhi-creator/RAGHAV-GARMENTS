@@ -299,15 +299,15 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onNavigatePage
             <h4 className="text-xs font-bold uppercase tracking-wider text-white">Store &amp; Atelier</h4>
             <div className="flex items-start gap-2.5">
               <MapPin className="w-4 h-4 text-[#1455D9] shrink-0 mt-0.5" />
-              <span>Raghav Garments, 24-B Fashion Boulevard, Ring Road, New Delhi, 110049, India</span>
+              <span>Raghav Garments, Tehsil Road, Outside Grain Grinder Lane, Kaithal, Haryana</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Phone className="w-4 h-4 text-[#1455D9] shrink-0" />
-              <span>+91 98712 34567 (10 AM - 7 PM)</span>
+              <span>+91 94663 75135 (9 AM - 8 PM)</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Mail className="w-4 h-4 text-[#1455D9] shrink-0" />
-              <span>care@raghavgarments.com</span>
+              <span>ridhitaneja1404@gmail.com</span>
             </div>
             <div className="pt-2">
               <span className="text-[11px] text-slate-500 block mb-1 font-semibold uppercase">
